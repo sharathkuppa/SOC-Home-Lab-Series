@@ -28,10 +28,16 @@ Deployed a standalone Wazuh manager and Windows agent to monitor a local endpoin
 
 ---
 
-## 📂 Phase 2: Network Intrusion Detection (Suricata) 
-**View full documentation & configurations:** [/02-Network-IDS-Suricata](./02-Network-IDS-Suricata/) *(Coming Soon)*
+## 📁 Phase 2: Network Security & IDS Integration (Suricata + Wazuh)
 
-Configuring a network-based Intrusion Detection System (IDS) on an Ubuntu virtual machine to capture and analyze malicious network traffic. 
+**View full documentation & configurations:** [02-Network-IDS-Suricata](./02-Network-IDS-Suricata)
+
+Integrated a Suricata Network Intrusion Detection System (NIDS) on a Kali Linux sensor with the centralized Wazuh SIEM to monitor network traffic and detect malicious signatures in real time.
+
+**Key Achievements:**
+* **NIDS Deployment & JSON Logging:** Configured Suricata to log structured network telemetry to `/var/log/suricata/eve.json`.
+* **SIEM Pipeline Integration:** Configured the Wazuh agent logcollector to ingest `eve.json` and transmit parsed logs to the Windows Docker-hosted Wazuh Manager across a VMware virtual bridge (`VMnet8`).
+* **Threat Simulation & Triage:** Simulated a BlackSun Network Trojan using custom User-Agent strings. Verified rule `86601` alerts in the Wazuh Threat Hunting dashboard and parsed raw network metadata.
 
 ---
 
