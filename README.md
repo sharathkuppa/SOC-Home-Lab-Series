@@ -1,4 +1,4 @@
-# 🛡️ SOC Home Lab Series: Endpoint & Network Security
+﻿# 🛡️ SOC Home Lab Series: Endpoint & Network Security
 
 ![Wazuh](https://img.shields.io/badge/Wazuh-00A9E5?style=for-the-badge&logo=wazuh&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Suricata](https://img.shields.io/badge/Suricata-EF3B2D?style=for-the-badge&logo=suricata&logoColor=white)
 
@@ -10,7 +10,7 @@ A comprehensive, multi-phase cybersecurity home lab designed to simulate Tier 1 
 | :--- | :--- | :--- | :--- |
 | **Endpoint SIEM** | Wazuh | Vulnerability management, log aggregation, and File Integrity Monitoring (FIM). | ✅ Completed |
 | **Network IDS/IPS** | Suricata | Packet capture, rule-based threat detection, and active network monitoring. | ✅ Completed |
-| **Endpoints** | Windows 11, Ubuntu | Target machines for simulating attacks and monitoring anomalies. | 🔄 Active |
+| **Endpoints** | Windows 11, Ubuntu | Target machines for simulating attacks and monitoring anomalies. | ✅ Completed |
 
 ---
 
@@ -34,6 +34,17 @@ Integrated a Suricata Network Intrusion Detection System (NIDS) on a Kali Linux 
 * **NIDS Deployment & JSON Logging:** Configured Suricata to log structured network telemetry to `/var/log/suricata/eve.json`.
 * **SIEM Pipeline Integration:** Configured the Wazuh agent logcollector to ingest `eve.json` and transmit parsed logs to the Windows Docker-hosted Wazuh Manager across a VMware virtual bridge (`VMnet8`).
 * **Threat Simulation & Triage:** Simulated a BlackSun Network Trojan using custom User-Agent strings. Verified rule `86601` alerts in the Wazuh Threat Hunting dashboard and parsed raw network metadata.
+
+---
+
+## 📂 Phase 3: Automated Active Response (Wazuh)
+**View full documentation & configurations:** [Wazuh-Active-Response](./Wazuh-Active-Response)
+
+Deployed an automated defense mechanism using Wazuh's Active Response capabilities to instantly block detected network attacks.
+
+**Key Achievements:**
+- **SSH Brute-Force Detection:** Simulated an SSH brute-force attack (Hydra) from a Kali Linux VM against an Ubuntu WSL endpoint, triggering Wazuh authentication failure rules (Rule 5716).
+- **Automated Mitigation (Active Response):** Configured the Wazuh Manager XML settings to automatically execute a `firewall-drop` script upon detection, successfully appending the attacker's IP to the Ubuntu iptables drop list to sever the connection.
 
 ---
 
