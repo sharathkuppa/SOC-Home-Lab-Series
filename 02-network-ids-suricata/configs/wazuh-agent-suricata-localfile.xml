@@ -1,4 +1,4 @@
-﻿<localfile>
+<localfile>
   <log_format>json</log_format>
   <location>/var/log/suricata/eve.json</location>
 </localfile>
