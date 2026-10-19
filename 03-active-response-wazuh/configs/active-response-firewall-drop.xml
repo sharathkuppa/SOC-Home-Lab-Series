@@ -1,4 +1,4 @@
-﻿<active-response>
+<active-response>
   <command>firewall-drop</command>
   <location>local</location>
   <rules_id>5710,5503,5716,5720,5712</rules_id>

@@ -1,55 +1,58 @@
-﻿# 🛡️ SOC Home Lab Series: Endpoint & Network Security
+# 🛡️ SOC Home Lab Series
 
-![Wazuh](https://img.shields.io/badge/Wazuh-00A9E5?style=for-the-badge&logo=wazuh&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Suricata](https://img.shields.io/badge/Suricata-EF3B2D?style=for-the-badge&logo=suricata&logoColor=white)
+![Wazuh](https://img.shields.io/badge/Wazuh-00A9E5?style=for-the-badge&logo=wazuh&logoColor=white) ![Suricata](https://img.shields.io/badge/Suricata-EF3B2D?style=for-the-badge&logo=suricata&logoColor=white) ![Windows](https://img.shields.io/badge/Windows_11-0078D6?style=for-the-badge&logo=windows&logoColor=white) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Kali](https://img.shields.io/badge/Kali_Linux-557C94?style=for-the-badge&logo=kalilinux&logoColor=white)
 
-A comprehensive, multi-phase cybersecurity home lab designed to simulate Tier 1 Security Operations Center (SOC) environments. This repository documents the deployment, configuration, and active threat monitoring of both endpoint and network infrastructures.
+A three-phase home lab that simulates a Tier 1 SOC workflow: **detect → triage → respond**. Each phase has its own write-up, the exact configuration files used, and screenshots of the results.
 
 ## 🏗️ Lab Architecture
 
-| Component | Technology | Purpose | Status |
-| :--- | :--- | :--- | :--- |
-| **Endpoint SIEM** | Wazuh | Vulnerability management, log aggregation, and File Integrity Monitoring (FIM). | ✅ Completed |
-| **Network IDS/IPS** | Suricata | Packet capture, rule-based threat detection, and active network monitoring. | ✅ Completed |
-| **Endpoints** | Windows 11, Ubuntu | Target machines for simulating attacks and monitoring anomalies. | ✅ Completed |
+| Component | Technology | Role |
+| :--- | :--- | :--- |
+| SIEM | Wazuh (Manager, Indexer, Dashboard) in Docker on Windows | Log aggregation, vulnerability detection, FIM, alerting, active response |
+| Network IDS | Suricata on Kali Linux | Signature-based network detection, JSON telemetry (`eve.json`) |
+| Endpoints | Windows 11, Ubuntu (WSL) | Monitored targets |
+| Attacker | Kali Linux (VMware, VMnet8) | Simulated attacks (Hydra, crafted HTTP requests) |
 
----
+## 📚 Phases
 
-## 📁 Phase 1: Endpoint Security & Monitoring (Wazuh)
-**View full documentation & configurations:** [01-Endpoint-Security-Wazuh](./01-Endpoint-Security-Wazuh/)
+| # | Phase | What it demonstrates | Key detections |
+| :-: | :--- | :--- | :--- |
+| 1 | [Endpoint Security & Monitoring](./01-endpoint-security-wazuh/) | Vulnerability management, remediation, custom FIM | CVE-2025-43859 (h11), Level 7 "Integrity checksum changed" |
+| 2 | [Network IDS Integration](./02-network-ids-suricata/) | Suricata → Wazuh log pipeline, alert triage | Rule 86601 (ET USER_AGENTS "BlackSun") |
+| 3 | [Automated Active Response](./03-active-response-wazuh/) | Detection-to-containment automation | Rule 5716 → `firewall-drop` → Rule 651 |
 
-Deployed a standalone Wazuh manager and Windows agent to monitor a local endpoint for critical vulnerabilities and unauthorized file modifications.
+## 🔎 Highlights
 
-**Key Achievements:**
-* **Vulnerability Remediation (CVE-2025-43859):** Identified a critical vulnerability within the h11 Python package via the Wazuh dashboard. Executed a remediation cycle using PowerShell to upgrade the package, resolved httpcore dependency conflicts, and verified alert clearance.
-* **Custom File Integrity Monitoring (FIM):** Engineered monitoring rules by modifying the Wazuh agent's `ossec.conf` XML configuration. Validated rule triggers for unauthorized file modifications, capturing Level 7 "Integrity checksum changed" alerts.
+- **Remediated a critical CVE end to end:** found it in the Wazuh dashboard, upgraded the package with PowerShell, resolved the `httpcore` dependency conflict, confirmed the alert cleared.
+- **Built custom FIM rules** in the Windows agent's `ossec.conf` and validated them with simulated file tampering.
+- **Wired Suricata into Wazuh** by ingesting `eve.json` through the agent's `logcollector` across a VMware virtual network.
+- **Automated containment:** a Hydra SSH brute-force attack triggers Wazuh Rule 5716, which runs `firewall-drop` and adds the attacker's IP to the iptables drop list for 60 seconds.
 
----
+## 📁 Repository Structure
 
-## 📁 Phase 2: Network Security & IDS Integration (Suricata + Wazuh)
-**View full documentation & configurations:** [02-Network-IDS-Suricata](./02-Network-IDS-Suricata/)
+```
+soc-home-lab-series/
+├── 01-endpoint-security-wazuh/
+│   ├── README.md
+│   ├── configs/windows-agent-ossec.conf
+│   └── screenshots/
+├── 02-network-ids-suricata/
+│   ├── README.md
+│   ├── configs/wazuh-agent-suricata-localfile.xml
+│   └── screenshots/
+├── 03-active-response-wazuh/
+│   ├── README.md
+│   ├── configs/active-response-firewall-drop.xml
+│   └── screenshots/
+├── LICENSE
+└── README.md
+```
 
-Integrated a Suricata Network Intrusion Detection System (NIDS) on a Kali Linux sensor with the centralized Wazuh SIEM to monitor network traffic and detect malicious signatures in real time.
+## ⚠️ Disclaimer
 
-**Key Achievements:**
-* **NIDS Deployment & JSON Logging:** Configured Suricata to log structured network telemetry to `/var/log/suricata/eve.json`.
-* **SIEM Pipeline Integration:** Configured the Wazuh agent logcollector to ingest `eve.json` and transmit parsed logs to the Windows Docker-hosted Wazuh Manager across a VMware virtual bridge (`VMnet8`).
-* **Threat Simulation & Triage:** Simulated a BlackSun Network Trojan using custom User-Agent strings. Verified rule `86601` alerts in the Wazuh Threat Hunting dashboard and parsed raw network metadata.
-
----
-
-## 📂 Phase 3: Automated Active Response (Wazuh)
-**View full documentation & configurations:** [Wazuh-Active-Response](./Wazuh-Active-Response)
-
-Deployed an automated defense mechanism using Wazuh's Active Response capabilities to instantly block detected network attacks.
-
-**Key Achievements:**
-- **SSH Brute-Force Detection:** Simulated an SSH brute-force attack (Hydra) from a Kali Linux VM against an Ubuntu WSL endpoint, triggering Wazuh authentication failure rules (Rule 5716).
-- **Automated Mitigation (Active Response):** Configured the Wazuh Manager XML settings to automatically execute a `firewall-drop` script upon detection, successfully appending the attacker's IP to the Ubuntu iptables drop list to sever the connection.
-
----
+All attacks were run against systems I own, inside an isolated lab network, for learning purposes only.
 
 ## 👨‍💻 Author
-**Sharath K L**
-* Security Operations Center (SOC) Analyst
-* **LinkedIn:** [Sharath K L](https://www.linkedin.com/in/sharath-k-l-094660289)
-* **Location:** Bengaluru, India
+
+**Sharath K L**, aspiring SOC / Security Analyst, Bengaluru, India
+[LinkedIn](https://www.linkedin.com/in/sharath-k-l-094660289) · [GitHub](https://github.com/sharathkuppa)
