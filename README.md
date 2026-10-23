@@ -2,7 +2,7 @@
 
 ![Wazuh](https://img.shields.io/badge/Wazuh-00A9E5?style=for-the-badge&logo=wazuh&logoColor=white) ![Suricata](https://img.shields.io/badge/Suricata-EF3B2D?style=for-the-badge&logo=suricata&logoColor=white) ![Windows](https://img.shields.io/badge/Windows_11-0078D6?style=for-the-badge&logo=windows&logoColor=white) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Kali](https://img.shields.io/badge/Kali_Linux-557C94?style=for-the-badge&logo=kalilinux&logoColor=white)
 
-A three-phase home lab that simulates a Tier 1 SOC workflow: **detect → triage → respond**. Each phase has its own write-up, the exact configuration files used, and screenshots of the results.
+A four-phase home lab that simulates a Tier 1 SOC workflow: **detect → triage → respond**. Each phase has its own write-up, the exact configuration files used, and screenshots of the results.
 
 ## 🏗️ Lab Architecture
 
@@ -20,6 +20,7 @@ A three-phase home lab that simulates a Tier 1 SOC workflow: **detect → triage
 | 1 | [Endpoint Security & Monitoring](./01-endpoint-security-wazuh/) | Vulnerability management, remediation, custom FIM | CVE-2025-43859 (h11), Level 7 "Integrity checksum changed" |
 | 2 | [Network IDS Integration](./02-network-ids-suricata/) | Suricata → Wazuh log pipeline, alert triage | Rule 86601 (ET USER_AGENTS "BlackSun") |
 | 3 | [Automated Active Response](./03-active-response-wazuh/) | Detection-to-containment automation | Rule 5716 → `firewall-drop` → Rule 651 |
+| 4 | [Sysmon Log Analysis](./04-sysmon-log-analysis/) | Host telemetry, detection coverage testing, alert triage | Rules 92057, 92031/92033, 92302; 2 detection gaps documented |
 
 ## 🔎 Highlights
 
@@ -27,6 +28,7 @@ A three-phase home lab that simulates a Tier 1 SOC workflow: **detect → triage
 - **Built custom FIM rules** in the Windows agent's `ossec.conf` and validated them with simulated file tampering.
 - **Wired Suricata into Wazuh** by ingesting `eve.json` through the agent's `logcollector` across a VMware virtual network.
 - **Automated containment:** a Hydra SSH brute-force attack triggers Wazuh Rule 5716, which runs `firewall-drop` and adds the attacker's IP to the iptables drop list for 60 seconds.
+- **Tested detection coverage with Sysmon:** simulated five attacker behaviours, found 3 detected and 2 gaps, confirmed the gaps were in Wazuh's ruleset rather than Sysmon logging, and triaged two high-severity alerts (rules 92213 and 92058) as false positives using process, parent and command-line evidence.
 
 ## 📁 Repository Structure
 
@@ -43,6 +45,10 @@ soc-home-lab-series/
 ├── 03-active-response-wazuh/
 │   ├── README.md
 │   ├── configs/active-response-firewall-drop.xml
+│   └── screenshots/
+├── 04-sysmon-log-analysis/
+│   ├── README.md
+│   ├── configs/wazuh-agent-sysmon-localfile.xml
 │   └── screenshots/
 ├── LICENSE
 └── README.md
